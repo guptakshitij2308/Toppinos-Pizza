@@ -10,6 +10,7 @@ import CreateOrder, {
 import Order from "./features/order/Order";
 import AppLayout from "./ui/AppLayout";
 import Error from "./ui/Error";
+import { action as UpdateOrderPriority } from "./features/order/UpdateOrder";
 
 // This way of defining routes enable data fetching,loading and data actions capabilities (on submitting form) ( impertative way )
 const router = createBrowserRouter([
@@ -41,6 +42,7 @@ const router = createBrowserRouter([
         element: <Order />,
         loader: orderLoader, // Loaders are used to read data while react router actions are used to write data and update the data.
         errorElement: <Error />,
+        action: UpdateOrderPriority,
       },
     ],
   },

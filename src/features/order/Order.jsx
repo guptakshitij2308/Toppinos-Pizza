@@ -3,8 +3,10 @@
 import { getOrder } from "../../services/apiRestaurant";
 
 import { calcMinutesLeft, formatCurrency, formatDate } from "../utils/helpers";
-import { useLoaderData } from "react-router-dom";
+import { useFetcher, useLoaderData } from "react-router-dom";
 import OrderItem from "../order/OrderItem";
+import { useEffect } from "react";
+import UpdateOrder from "./UpdateOrder";
 
 function Order() {
   const order = useLoaderData();
@@ -21,6 +23,18 @@ function Order() {
   } = order;
 
   const deliveryIn = calcMinutesLeft(estimatedDelivery);
+
+  const fetcher = useFetcher(); // how to fetch and mututate data without even causing navigations
+  // idea is to load menu data so that we can associate ingredients to each pizzas
+
+  useEffect(
+    function () {
+      if (!fetcher.data && fetcher.state === "idle") fetcher.load("/menu");
+    },
+    [fetcher],
+  );
+
+  // console.log(fetcher.data);
 
   return (
     <div className="space-y-8 px-4 py-6">
@@ -52,7 +66,15 @@ function Order() {
 
       <ul className=" divide-y divide-stone-200 border-b border-t">
         {cart.map((item, index) => (
-          <OrderItem item={item} key={index} />
+          <OrderItem
+            item={item}
+            key={index}
+            isLoadingIngredients={fetcher.state === "loading"}
+            ingredients={
+              fetcher?.data?.find((el) => el.id === item.pizzaId)
+                ?.ingredients ?? []
+            }
+          />
         ))}
       </ul>
 
@@ -69,6 +91,7 @@ function Order() {
           To pay on delivery: {formatCurrency(orderPrice + priorityPrice)}
         </p>
       </div>
+      {!priority && <UpdateOrder order={order} />}
     </div>
   );
 }
